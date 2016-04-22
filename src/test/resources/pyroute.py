@@ -9,5 +9,3 @@ class PythonProcessor(Processor):
 class PythonRoute(RouteBuilder):
     def configure(self):
         self.fromF("direct:py_start").routeId("python.route").process(PythonProcessor()).to("mock:py_end")
-
-PythonRoute()

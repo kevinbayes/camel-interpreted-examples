@@ -32,6 +32,7 @@ dependencies {
 	compile('org.apache.camel:camel-spring-boot-starter:2.17.0')
 	compile('org.springframework.boot:spring-boot-starter-groovy-templates')
 	compile('org.springframework.boot:spring-boot-starter-remote-shell')
+	compile('org.python:jython-standalone:2.7.0')
 	testCompile('org.springframework.boot:spring-boot-starter-test') 
 }
 

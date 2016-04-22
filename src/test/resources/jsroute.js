@@ -10,7 +10,7 @@ var TheOriginalProcess = Java.extend(OriginalProcess);
 
 var process = new TheOriginalProcess() {
     process: function(exchange) {
-        print(exchange.getIn().getBody());
+        print("JavaScript Test ----> " + exchange.getIn().getBody());
     }
 }
 

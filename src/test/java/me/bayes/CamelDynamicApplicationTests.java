@@ -11,6 +11,8 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.python.core.PyObject;
+import org.python.util.PythonInterpreter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
@@ -23,6 +25,7 @@ import javax.script.ScriptEngineManager;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.MalformedURLException;
@@ -45,6 +48,9 @@ public class CamelDynamicApplicationTests {
 
 	@EndpointInject(uri = "mock:py_end")
 	protected MockEndpoint pyEnd;
+
+	@EndpointInject(uri = "mock:g_end")
+	protected MockEndpoint gEnd;
 
 	@EndpointInject(uri = "mock:end")
 	protected MockEndpoint javaEnd;
@@ -100,15 +106,20 @@ public class CamelDynamicApplicationTests {
 		dynamicEnd.assertIsSatisfied();
 	}
 
-	/*@Test
+	@Test
 	@DirtiesContext
 	public void contextLoadsPython() throws Exception {
 
 		assertNotNull(camelContext);
 
-		ScriptEngine engine = new ScriptEngineManager().getEngineByName("python");
+		final File source = ResourceUtils.getFile("classpath:pyroute.py");
 
-		RouteBuilder result = (RouteBuilder)engine.eval(new FileReader(ResourceUtils.getFile("classpath:pyroute.py")));
+		PythonInterpreter python = new PythonInterpreter();
+
+		python.execfile(new FileInputStream(source));
+		PyObject buildingClass = python.get("PythonRoute");
+
+		RouteBuilder result = (RouteBuilder) buildingClass.__call__().__tojava__(RouteBuilder.class);
 
 		camelContext.addRoutes(result);
 
@@ -131,16 +142,14 @@ public class CamelDynamicApplicationTests {
 
 		Class clazz = engine.loadScriptByName("groute.groovy");
 
-		System.out.println(clazz);
-
-		RouteBuilder result = (RouteBuilder)engine.eval(new FileReader(ResourceUtils.getFile("classpath:pyroute.py")));
+		RouteBuilder result = (RouteBuilder) clazz.newInstance();
 
 		camelContext.addRoutes(result);
 
-		camelContext.startRoute("python.route");
+		camelContext.startRoute("groovy.route");
 
-		template.sendBody("direct:py_start", "Testing Python");
+		template.sendBody("direct:g_start", "Testing Groovy");
 
-		pyEnd.assertIsSatisfied();
-	}*/
+		gEnd.assertIsSatisfied();
+	}
 }
